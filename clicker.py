@@ -4,6 +4,8 @@ class ClickerApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.points = 0
+        self.points_per_click = 1
+        self.price_for_upgrade = 10
 
         self.geometry("600x450")
         self.title("Classic Clicker")
@@ -11,13 +13,22 @@ class ClickerApp(ctk.CTk):
 
         self.your_points_label = ctk.CTkLabel(self, text=f"Your points: {self.points}",font=("Arial", 24))
         self.your_points_label.grid(row=0, column=0, padx=20, pady=(20, 60), sticky="w")
-        self.button = ctk.CTkButton(self, text="", width=200, height=200, corner_radius=100, border_width=3, hover_color="#3B4482", command=self.update_points)
-        self.button.grid(row=1,column=0)
+        self.main_button = ctk.CTkButton(self, text="", width=200, height=200, corner_radius=100, border_width=3, hover_color="#3B4482", command=self.update_points)
+        self.main_button.grid(row=1, column=0, pady=(0,50))
+        self.upgrade_button = ctk.CTkButton(self, text=f"Upgrade button (Cost: {self.price_for_upgrade})", command=self.upgrade_main_button)
+        self.upgrade_button.grid(row=2, column=0)
 
     def update_points(self):
-        self.points = self.points + 1
+        self.points = self.points + self.points_per_click
         self.your_points_label.configure(text=f"Your points: {self.points}")
 
+    def upgrade_main_button(self):
+        if self.points >= self.price_for_upgrade:
+            self.points -= self.price_for_upgrade
+            self.your_points_label.configure(text=f"Your points: {self.points}")
+            self.points_per_click += 1
+            self.price_for_upgrade *= 10
+            self.upgrade_button.configure(text=f"Upgrade button (Cost: {self.price_for_upgrade})")
 
 if __name__ == "__main__":
     app = ClickerApp()
