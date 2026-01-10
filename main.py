@@ -1,19 +1,11 @@
 import customtkinter as ctk
-
-class ShopWindow(ctk.CTkToplevel):
-    def __init__(self, master):
-        super().__init__(master)
-        self.geometry("300x200")
-        self.title("Shop")
-
-        header = ctk.CTkLabel(self, text="Welcome to the shop!")
-        header.grid(row=0, column=0)
-
-
+from shop import ShopWindow
 
 class ClickerApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
         self.shop = None
         self.points = 0
         self.points_per_click = 1
@@ -22,6 +14,8 @@ class ClickerApp(ctk.CTk):
         self.geometry("600x450")
         self.title("Classic Clicker")
         self.columnconfigure(0, weight=1)
+
+        self.load_save()
 
         self.your_points_label = ctk.CTkLabel(self, text=f"Your points: {self.points}",font=("Arial", 24))
         self.your_points_label.grid(row=0, column=0, padx=20, pady=(20, 60), sticky="w")
@@ -39,16 +33,47 @@ class ClickerApp(ctk.CTk):
     def upgrade_main_button(self):
         if self.points >= self.price_for_upgrade:
             self.points -= self.price_for_upgrade
-            self.your_points_label.configure(text=f"Your points: {self.points}")
             self.points_per_click += 1
             self.price_for_upgrade *= 10
+
+            self.your_points_label.configure(text=f"Your points: {self.points}")
             self.upgrade_button.configure(text=f"Upgrade button (Cost: {self.price_for_upgrade})")
+
+            self.save_game()
 
     def open_shop(self):
         if self.shop == None or not self.shop.winfo_exists():
             self.shop = ShopWindow(self)
         else:
             self.shop.focus()
+
+    def save_game(self):
+        with open("save.txt", "w") as file:
+            file.write(str(self.points) + "\n")
+            file.write(str(self.points_per_click) + "\n")
+            file.write(str(self.price_for_upgrade) + "\n")
+
+    def on_closing(self):
+        self.save_game()
+        self.destroy()
+
+    def load_save(self):
+        try:
+            with open("save.txt", "r") as file:
+                lines = file.readlines()
+                if len(lines) >= 3:
+                    try:
+                        self.points = int(lines[0])
+                        self.points_per_click = int(lines[1])
+                        self.price_for_upgrade = int(lines[2])
+                    except ValueError:
+                        print("ERROR: something isn't integer in save.txt, restoring to default values")
+                        self.points = 0
+                        self.points_per_click = 1
+                        self.price_for_upgrade = 10
+        except FileNotFoundError:
+            print("ERROR: no save file")
+
 
 if __name__ == "__main__":
     app = ClickerApp()
