@@ -14,16 +14,21 @@ class ClickerApp(ctk.CTk):
         self.price_for_upgrade = 10
         self.robots = [Robot("Beginner", 1, 200, False)]
 
-        self.geometry("600x450")
+        self.geometry("700x450")
         self.title("Classic Clicker")
+        self.resizable(False, False)
+
         self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=3)
+        self.columnconfigure(2, weight=1)
+        self.rowconfigure(4, weight=1)
 
         self.load_save()
 
         self.your_points_label = ctk.CTkLabel(
             self, text=f"Your points: {self.points}", font=("Arial", 24)
         )
-        self.your_points_label.grid(row=0, column=0, padx=20, pady=(20, 60), sticky="w")
+        self.your_points_label.grid(row=0, column=0, padx=20, pady=20, sticky="nw")
         self.main_button = ctk.CTkButton(
             self,
             text="",
@@ -34,17 +39,25 @@ class ClickerApp(ctk.CTk):
             hover_color="#3B4482",
             command=self.update_points,
         )
-        self.main_button.grid(row=1, column=0, pady=(0, 50))
+        self.main_button.grid(row=1, column=1, pady=(0, 50))
         self.upgrade_button = ctk.CTkButton(
             self,
             text=f"Upgrade button (Cost: {self.price_for_upgrade})",
             command=self.upgrade_main_button,
         )
-        self.upgrade_button.grid(row=2, column=0)
+        self.upgrade_button.grid(row=2, column=1)
         self.shop_button = ctk.CTkButton(
-            self, text="To the shop", command=self.open_shop
+            self,
+            text="S\nH\nO\nP",
+            command=self.open_shop,
+            height=250,
+            font=("Arial", 28),
         )
-        self.shop_button.grid(row=1, column=1)
+        self.shop_button.grid(row=1, column=2, padx=10, rowspan=2, sticky="e")
+        self.about_button = ctk.CTkButton(self, text="About")
+        self.about_button.grid(row=5, column=0, padx=20, pady=5, sticky="sw")
+        self.settings_buttton = ctk.CTkButton(self, text="Settings")
+        self.settings_buttton.grid(row=6, column=0, padx=20, pady=(5, 20), sticky="sw")
 
         self.auto_click()
 
