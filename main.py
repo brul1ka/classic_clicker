@@ -12,7 +12,11 @@ class ClickerApp(ctk.CTk):
         self.points = 0
         self.points_per_click = 1
         self.price_for_upgrade = 10
-        self.robots = [Robot("Beginner", 1, 200, False)]
+        self.robots = [
+            Robot("Beginner", 1, 200, False, 0),
+            Robot("Clapon", 3, 1000, False, 0),
+        ]
+        self.income_from_robots = 0
 
         self.geometry("700x450")
         self.title("Classic Clicker")
@@ -26,7 +30,7 @@ class ClickerApp(ctk.CTk):
         self.load_save()
 
         self.your_points_label = ctk.CTkLabel(
-            self, text=f"Your points: {self.points}", font=("Arial", 24)
+            self, text=f"Your points:\n{self.points}", font=("Arial", 24)
         )
         self.your_points_label.grid(row=0, column=0, padx=20, pady=20, sticky="nw")
         self.main_button = ctk.CTkButton(
@@ -36,7 +40,6 @@ class ClickerApp(ctk.CTk):
             height=200,
             corner_radius=100,
             border_width=3,
-            hover_color="#3B4482",
             command=self.update_points,
         )
         self.main_button.grid(row=1, column=1, pady=(0, 50))
@@ -58,12 +61,14 @@ class ClickerApp(ctk.CTk):
         self.about_button.grid(row=5, column=0, padx=20, pady=5, sticky="sw")
         self.settings_buttton = ctk.CTkButton(self, text="Settings")
         self.settings_buttton.grid(row=6, column=0, padx=20, pady=(5, 20), sticky="sw")
+        self.your_robots_label = ctk.CTkLabel(self)
+        self.your_robots_label.grid(row=6, column=2, sticky="ew")
 
         self.auto_click()
 
     def update_points(self):
         self.points = self.points + self.points_per_click
-        self.your_points_label.configure(text=f"Your points: {self.points}")
+        self.your_points_label.configure(text=f"Your points:\n{self.points}")
 
     def upgrade_main_button(self):
         if self.points >= self.price_for_upgrade:
@@ -71,7 +76,7 @@ class ClickerApp(ctk.CTk):
             self.points_per_click += 1
             self.price_for_upgrade *= 10
 
-            self.your_points_label.configure(text=f"Your points: {self.points}")
+            self.your_points_label.configure(text=f"Your points:\n{self.points}")
             self.upgrade_button.configure(
                 text=f"Upgrade button (Cost: {self.price_for_upgrade})"
             )
@@ -91,6 +96,7 @@ class ClickerApp(ctk.CTk):
             file.write(str(self.price_for_upgrade) + "\n")
             for robot in self.robots:
                 file.write(str(1) + "\n") if robot.exists else file.write(str(0) + "\n")
+                file.write(str(robot.how_many) + "\n")
 
     def on_closing(self):
         self.save_game()
@@ -109,6 +115,7 @@ class ClickerApp(ctk.CTk):
                         if len(lines) >= 4:
                             for i, robot in enumerate(self.robots):
                                 robot.exists = bool(int(lines[3 + i]))
+                                robot.how_many = int(lines[4 + i])
                 except ValueError:
                     print(
                         "ERROR: something isn't integer in save.txt, restoring to default values"
@@ -120,13 +127,16 @@ class ClickerApp(ctk.CTk):
             print("INFO: no save file")
 
     def auto_click(self):
-        total_income = 0
         for i, robot in enumerate(self.robots):
             if robot.exists:
-                total_income += robot.power
+                self.income_from_robots += robot.power * robot.how_many
 
-        self.points += total_income
-        self.your_points_label.configure(text=f"Your points: {self.points}")
+        self.points += self.income_from_robots
+        self.your_points_label.configure(text=f"Your points:\n{self.points}")
+        self.your_robots_label.configure(
+            text=f"Power of all your robots: {self.income_from_robots}"
+        )
+        self.income_from_robots = 0
         self.after(1000, self.auto_click)
 
 
