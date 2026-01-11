@@ -10,13 +10,18 @@ class ShopWindow(ctk.CTkToplevel):
         self.geometry("500x450")
         self.title("Robot shop")
 
+        self.title = ctk.CTkLabel(
+            self, text="Welcome in Robot Shop!", font=("Arial", 32, "bold")
+        )
+        self.title.pack(pady=(10, 20))
+
         for i, robot in enumerate(self.master.robots):
             button = ctk.CTkButton(
                 self,
                 text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec",
             )
             button.configure(command=lambda r=robot, b=button: self.buy_robot(r, b))
-            button.pack(fill="x", pady=15, padx=20)
+            button.pack(fill="x", pady=5, padx=20)
             self.button_list.append((button, robot))
 
         self.update_buttons()
@@ -25,8 +30,9 @@ class ShopWindow(ctk.CTkToplevel):
         if self.master.points >= robot.price:
             self.master.points -= robot.price
             robot.exists = True
+            robot.how_many += 1
             self.master.your_points_label.configure(
-                text=f"Your points: {self.master.points}"
+                text=f"Your points:\n{self.master.points}"
             )
 
     def update_buttons(self):
