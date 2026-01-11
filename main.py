@@ -1,6 +1,10 @@
 import customtkinter as ctk
+import json
+from dataclasses import asdict
 from shop import ShopWindow
-from entities import Robot
+from about import AboutWindow
+from settings import SettingsWindow
+from robot import Robot
 
 
 class ClickerApp(ctk.CTk):
@@ -15,6 +19,7 @@ class ClickerApp(ctk.CTk):
         self.robots = [
             Robot("Beginner", 1, 200, False, 0),
             Robot("Clapon", 3, 1000, False, 0),
+            Robot("Sen", 10, 2500, False, 0),
         ]
         self.income_from_robots = 0
 
@@ -57,9 +62,11 @@ class ClickerApp(ctk.CTk):
             font=("Arial", 28),
         )
         self.shop_button.grid(row=1, column=2, padx=10, rowspan=2, sticky="e")
-        self.about_button = ctk.CTkButton(self, text="About")
+        self.about_button = ctk.CTkButton(self, text="About", command=self.open_about)
         self.about_button.grid(row=5, column=0, padx=20, pady=5, sticky="sw")
-        self.settings_buttton = ctk.CTkButton(self, text="Settings")
+        self.settings_buttton = ctk.CTkButton(
+            self, text="Settings", command=self.open_settings
+        )
         self.settings_buttton.grid(row=6, column=0, padx=20, pady=(5, 20), sticky="sw")
         self.your_robots_label = ctk.CTkLabel(self)
         self.your_robots_label.grid(row=6, column=2, sticky="ew")
@@ -89,14 +96,33 @@ class ClickerApp(ctk.CTk):
         else:
             self.shop.focus()
 
+    def open_about(self):
+        if self.shop == None or not self.shop.winfo_exists():
+            self.shop = AboutWindow(self)
+        else:
+            self.shop.focus()
+
+    def open_settings(self):
+        if self.shop == None or not self.shop.winfo_exists():
+            self.shop = SettingsWindow(self)
+        else:
+            self.shop.focus()
+
     def save_game(self):
-        with open("save.txt", "w") as file:
-            file.write(str(self.points) + "\n")
-            file.write(str(self.points_per_click) + "\n")
-            file.write(str(self.price_for_upgrade) + "\n")
-            for robot in self.robots:
-                file.write(str(1) + "\n") if robot.exists else file.write(str(0) + "\n")
-                file.write(str(robot.how_many) + "\n")
+        robots_data = []
+        for robot in self.robots:
+            dto = robot.to_dto()
+            robots_data.append(asdict(dto))
+
+        data_for_save = {
+            "points": self.points,
+            "points_per_click": self.points_per_click,
+            "price_for_upgrade": self.price_for_upgrade,
+            "robots": robots_data,
+        }
+
+        with open("save.json", "w", encoding="utf-8") as file:
+            json.dump(data_for_save, file, indent=4)
 
     def on_closing(self):
         self.save_game()
@@ -104,27 +130,21 @@ class ClickerApp(ctk.CTk):
 
     def load_save(self):
         try:
-            with open("save.txt", "r") as file:
-                lines = file.readlines()
-                try:
-                    if len(lines) >= 3:
-                        self.points = int(lines[0])
-                        self.points_per_click = int(lines[1])
-                        self.price_for_upgrade = int(lines[2])
-
-                        if len(lines) >= 4:
-                            for i, robot in enumerate(self.robots):
-                                robot.exists = bool(int(lines[3 + i]))
-                                robot.how_many = int(lines[4 + i])
-                except ValueError:
-                    print(
-                        "ERROR: something isn't integer in save.txt, restoring to default values"
-                    )
-                    self.points = 0
-                    self.points_per_click = 1
-                    self.price_for_upgrade = 10
+            with open("save.json", "r", encoding="utf-8") as file:
+                data = json.load(file)
+                self.points = data["points"]
+                self.points_per_click = data["points_per_click"]
+                self.price_for_upgrade = data["price_for_upgrade"]
+                robot_list_from_save = data["robots"]
+                for i, robot in enumerate(self.robots):
+                    if i < len(robot_list_from_save):
+                        robot_data = robot_list_from_save[i]
+                        robot.exists = robot_data["exists"]
+                        robot.how_many = robot_data["how_many"]
         except FileNotFoundError:
             print("INFO: no save file")
+        except KeyError as e:
+            print(f"ERROR: Missing key in save file: {e}")
 
     def auto_click(self):
         for i, robot in enumerate(self.robots):
