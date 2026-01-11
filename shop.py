@@ -18,7 +18,7 @@ class ShopWindow(ctk.CTkToplevel):
         for i, robot in enumerate(self.master.robots):
             button = ctk.CTkButton(
                 self,
-                text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec",
+                text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec. Quantity: {robot.how_many}",
             )
             button.configure(command=lambda r=robot, b=button: self.buy_robot(r, b))
             button.pack(fill="x", pady=5, padx=20)
@@ -33,6 +33,9 @@ class ShopWindow(ctk.CTkToplevel):
             robot.how_many += 1
             self.master.your_points_label.configure(
                 text=f"Your points:\n{self.master.points}"
+            )
+            button.configure(
+                text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec. Quantity: {robot.how_many}"
             )
 
     def update_buttons(self):
