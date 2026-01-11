@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from PIL import Image
+import webbrowser
 
 
 class AboutWindow(ctk.CTkToplevel):
@@ -24,16 +25,30 @@ Developed with passion by: brul1ka
 Version: idk
         """
 
-        logo = ctk.CTkImage(
+        left_frame = ctk.CTkFrame(self, fg_color="transparent")
+        left_frame.grid(row=0, column=0, padx=20, pady=20, sticky="n")
+
+        self.logo = ctk.CTkImage(
             Image.open("res/logo.png"), Image.open("res/logo.png"), (150, 150)
         )
-        logo_image = ctk.CTkLabel(self, image=logo, text="")
-        logo_image.grid(row=0, column=0, padx=(20, 10), pady=20, sticky="ew")
+        self.logo_image = ctk.CTkLabel(left_frame, image=self.logo, text="")
+        self.logo_image.pack(pady=(0, 10))
 
-        about = ctk.CTkLabel(
+        self.about = ctk.CTkLabel(
             self,
             text=description_text,
             justify="left",
             wraplength=200,
         )
-        about.grid(row=0, column=1, padx=(0, 10), pady=20)
+        self.about.grid(row=0, column=1, padx=(0, 10), pady=20)
+        self.github_button = ctk.CTkButton(
+            left_frame,
+            text="My project on GitHub!",
+            fg_color="#24292e",
+            hover_color="#404448",
+            width=150,
+            command=lambda: webbrowser.open_new_tab(
+                "https://github.com/brul1ka/classic-clicker"
+            ),
+        )
+        self.github_button.pack()
