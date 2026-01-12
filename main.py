@@ -10,9 +10,12 @@ from robot import Robot
 class ClickerApp(ctk.CTk):
     def __init__(self):
         super().__init__()
+        ctk.set_appearance_mode("dark")
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         self.shop = None
+        self.settings = None
+        self.about = None
         self.points = 0
         self.points_per_click = 1
         self.price_for_upgrade = 10
@@ -24,7 +27,7 @@ class ClickerApp(ctk.CTk):
         self.income_from_robots = 0
 
         self.geometry("700x450")
-        self.title("Classic Clicker")
+        self.title("classic clicker")
         self.resizable(False, False)
 
         self.columnconfigure(0, weight=1)
@@ -97,16 +100,16 @@ class ClickerApp(ctk.CTk):
             self.shop.focus()
 
     def open_about(self):
-        if self.shop == None or not self.shop.winfo_exists():
-            self.shop = AboutWindow(self)
+        if self.about == None or not self.about.winfo_exists():
+            self.about = AboutWindow(self)
         else:
-            self.shop.focus()
+            self.about.focus()
 
     def open_settings(self):
-        if self.shop == None or not self.shop.winfo_exists():
-            self.shop = SettingsWindow(self)
+        if self.settings == None or not self.settings.winfo_exists():
+            self.settings = SettingsWindow(self)
         else:
-            self.shop.focus()
+            self.settings.focus()
 
     def save_game(self):
         robots_data = []
