@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import os
 from PIL import Image
 import webbrowser
 
@@ -28,8 +29,10 @@ Version: idk
         left_frame = ctk.CTkFrame(self, fg_color="transparent")
         left_frame.grid(row=0, column=0, padx=20, pady=20, sticky="n")
 
+        base_path = os.path.dirname(os.path.realpath(__file__))
+        logo_path = os.path.join(base_path, "res", "logo.png")
         self.logo = ctk.CTkImage(
-            Image.open("res/logo.png"), Image.open("res/logo.png"), (150, 150)
+            Image.open(logo_path), Image.open(logo_path), (150, 150)
         )
         self.logo_image = ctk.CTkLabel(left_frame, image=self.logo, text="")
         self.logo_image.pack(pady=(0, 10))
