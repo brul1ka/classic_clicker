@@ -47,7 +47,7 @@ class ShopWindow(ctk.CTkToplevel):
                 text=f"Your points:\n{self.master.points}"
             )
             button.configure(
-                text=f"Buy spares for robots repair.\nWhen robot is broken, he gives 1% of his power.\nPrice: {self.spare_price} (for one robot)\n Totally: {self.total_price_for_spares}",
+                text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec. Quantity: {robot.count}"
             )
 
     def buy_spares(self):
@@ -59,17 +59,27 @@ class ShopWindow(ctk.CTkToplevel):
     def update_buttons(self):
         for btn, data in self.button_list:
             if data == "spare":
-                is_affordable = self.master.points >= self.total_price_for_spares
+                current_total = 0
                 for robot in self.master.robots:
                     if robot.is_broken:
-                        self.total_price_for_spares += self.spare_price * robot.count
+                        current_total += self.spare_price * robot.count
+
+                self.total_price_for_spares = current_total
+                is_affordable = self.master.points >= self.total_price_for_spares
 
                 btn.configure(
-                    fg_color="green" if is_affordable else "red",
-                    hover_color="dark green" if is_affordable else "dark red",
+                    fg_color=(
+                        "green"
+                        if is_affordable and self.total_price_for_spares > 0
+                        else "red"
+                    ),
+                    hover_color=(
+                        "dark green"
+                        if is_affordable and self.total_price_for_spares > 0
+                        else "dark red"
+                    ),
                     text=f"Buy spares for robots repair.\nWhen robot is broken, he gives 1% of his power.\nPrice: {self.spare_price} (for one robot)\n Totally: {self.total_price_for_spares}",
                 )
-                self.total_price_for_spares = 0
             else:
                 robot = data
                 is_affordable = self.master.points >= robot.price

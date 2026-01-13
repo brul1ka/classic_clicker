@@ -23,6 +23,8 @@ class ClickerApp(ctk.CTk):
             Robot("Beginner", 1, 200),
             Robot("Clapon", 3, 1000),
             Robot("Sen", 10, 2500),
+            Robot("Tomher", 25, 5000),
+            Robot("Absolute", 50, 10000),
         ]
         self.income_from_robots = 0
 
@@ -175,6 +177,7 @@ class ClickerApp(ctk.CTk):
         for robot in self.robots:
             if robot.check_for_breakdown() or robot.is_broken:
                 broken_robot_list.append(robot.name)
+
         if broken_robot_list:
             names = "s, ".join(broken_robot_list)
             self.robot_is_broken_label.configure(
