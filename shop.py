@@ -6,6 +6,7 @@ class ShopWindow(ctk.CTkToplevel):
         super().__init__(master)
 
         self.button_list = []
+        self.spare_price = 1000
 
         self.geometry("500x450")
         self.title("Robot shop")
@@ -18,11 +19,19 @@ class ShopWindow(ctk.CTkToplevel):
         for i, robot in enumerate(self.master.robots):
             button = ctk.CTkButton(
                 self,
-                text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec. Quantity: {robot.how_many}",
+                text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec. Quantity: {robot.count}",
             )
             button.configure(command=lambda r=robot, b=button: self.buy_robot(r, b))
             button.pack(fill="x", pady=5, padx=20)
             self.button_list.append((button, robot))
+
+        self.spare_button = ctk.CTkButton(
+            self,
+            text=f"Buy spares for robots repair.\nWhen robot is broken, he gives 1% of his power.\nPrice: {self.spare_price}",
+            command=self.buy_spares,
+        )
+        self.spare_button.pack(fill="x", pady=(50, 0), padx=20)
+        self.button_list.append((self.spare_button, "spare"))
 
         self.update_buttons()
 
@@ -30,20 +39,35 @@ class ShopWindow(ctk.CTkToplevel):
         if self.master.points >= robot.price:
             self.master.points -= robot.price
             robot.exists = True
-            robot.how_many += 1
+            robot.count += 1
+            robot.price = int(robot.price * 1.15)
+
             self.master.your_points_label.configure(
                 text=f"Your points:\n{self.master.points}"
             )
             button.configure(
-                text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec. Quantity: {robot.how_many}"
+                text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec. Quantity: {robot.count}"
             )
 
+    def buy_spares(self):
+        if self.master.points >= self.spare_price:
+            self.master.points -= self.spare_price
+            for robot in self.master.robots:
+                robot.is_broken = False
+
     def update_buttons(self):
-        for btn, robot in self.button_list:
-            btn.configure(
-                hover_color=(
-                    "dark green" if self.master.points >= robot.price else "dark red"
-                ),
-                fg_color="green" if self.master.points >= robot.price else "red",
-            )
-        self.after(100, self.update_buttons)
+        for btn, data in self.button_list:
+            if data == "spare":
+                is_affordable = self.master.points >= self.spare_price
+                btn.configure(
+                    fg_color="green" if is_affordable else "red",
+                    hover_color="dark green" if is_affordable else "dark red",
+                )
+            else:
+                robot = data
+                is_affordable = self.master.points >= robot.price
+                btn.configure(
+                    fg_color="green" if is_affordable else "red",
+                    hover_color="dark green" if is_affordable else "dark red",
+                )
+        self.after(500, self.update_buttons)

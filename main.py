@@ -20,9 +20,9 @@ class ClickerApp(ctk.CTk):
         self.points_per_click = 1
         self.price_for_upgrade = 10
         self.robots = [
-            Robot("Beginner", 1, 200, False, 0),
-            Robot("Clapon", 3, 1000, False, 0),
-            Robot("Sen", 10, 2500, False, 0),
+            Robot("Beginner", 1, 200),
+            Robot("Clapon", 3, 1000),
+            Robot("Sen", 10, 2500),
         ]
         self.income_from_robots = 0
 
@@ -64,17 +64,22 @@ class ClickerApp(ctk.CTk):
             height=250,
             font=("Arial", 28),
         )
-        self.shop_button.grid(row=1, column=2, padx=10, rowspan=2, sticky="e")
+        self.shop_button.grid(row=1, column=2, padx=10, sticky="e")
         self.about_button = ctk.CTkButton(self, text="About", command=self.open_about)
         self.about_button.grid(row=5, column=0, padx=20, pady=5, sticky="sw")
         self.settings_buttton = ctk.CTkButton(
             self, text="Settings", command=self.open_settings
         )
         self.settings_buttton.grid(row=6, column=0, padx=20, pady=(5, 20), sticky="sw")
-        self.your_robots_label = ctk.CTkLabel(self)
-        self.your_robots_label.grid(row=6, column=2, sticky="ew")
+        self.power_of_all_robots_label = ctk.CTkLabel(self, font=("Arial", 16))
+        self.power_of_all_robots_label.grid(row=6, column=2, pady=(0, 20), padx=(0, 10))
+        self.robot_is_broken_label = ctk.CTkLabel(
+            self, text="", font=("Arial", 18), justify="right"
+        )
+        self.robot_is_broken_label.grid(row=0, column=2, padx=10)
 
         self.auto_click()
+        self.to_breakdown()
 
     def update_points(self):
         self.points = self.points + self.points_per_click
@@ -143,7 +148,9 @@ class ClickerApp(ctk.CTk):
                     if i < len(robot_list_from_save):
                         robot_data = robot_list_from_save[i]
                         robot.exists = robot_data["exists"]
-                        robot.how_many = robot_data["how_many"]
+                        robot.count = robot_data["count"]
+                        robot.price = robot_data["price"]
+                        robot.is_broken = robot_data["is_broken"]
         except FileNotFoundError:
             print("INFO: no save file")
         except KeyError as e:
@@ -152,15 +159,31 @@ class ClickerApp(ctk.CTk):
     def auto_click(self):
         for i, robot in enumerate(self.robots):
             if robot.exists:
-                self.income_from_robots += robot.power * robot.how_many
+                multiplier = 1.0 if not robot.is_broken else 0.1
+                self.income_from_robots += int(robot.power * robot.count * multiplier)
 
         self.points += self.income_from_robots
         self.your_points_label.configure(text=f"Your points:\n{self.points}")
-        self.your_robots_label.configure(
+        self.power_of_all_robots_label.configure(
             text=f"Power of all your robots: {self.income_from_robots}"
         )
         self.income_from_robots = 0
         self.after(1000, self.auto_click)
+
+    def to_breakdown(self):
+        broken_robot_list = []
+        for robot in self.robots:
+            if robot.check_for_breakdown() or robot.is_broken:
+                broken_robot_list.append(robot.name)
+        if broken_robot_list:
+            names = ", ".join(broken_robot_list)
+            self.robot_is_broken_label.configure(
+                text=f"{names}\nhave broken down!", text_color="red"
+            )
+        else:
+            self.robot_is_broken_label.configure(text="")
+
+        self.after(1000, self.to_breakdown)
 
 
 if __name__ == "__main__":
