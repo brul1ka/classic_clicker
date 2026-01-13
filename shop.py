@@ -13,7 +13,9 @@ class ShopWindow(ctk.CTkToplevel):
         self.title("Robot shop")
 
         self.shop_title = ctk.CTkLabel(
-            self, text="Welcome in Robot Shop!", font=("Arial", 32, "bold")
+            self,
+            text=f"Welcome in Robot Shop!\nLBM to buy, RBM to sell",
+            font=("Arial", 32, "bold"),
         )
         self.shop_title.pack(pady=(10, 20))
 
@@ -23,6 +25,9 @@ class ShopWindow(ctk.CTkToplevel):
                 text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec. Quantity: {robot.count}",
             )
             button.configure(command=lambda r=robot, b=button: self.buy_robot(r, b))
+            button.bind(
+                "<Button-3>", lambda event, r=robot, b=button: self.sell_robot(r, b)
+            )
             button.pack(fill="x", pady=5, padx=20)
             self.button_list.append((button, robot))
 
@@ -42,6 +47,23 @@ class ShopWindow(ctk.CTkToplevel):
             robot.exists = True
             robot.count += 1
             robot.price = int(robot.price * 1.15)
+
+            self.master.your_points_label.configure(
+                text=f"Your points:\n{self.master.points}"
+            )
+            button.configure(
+                text=f"Buy {robot.name}, price: {robot.price}, gives {robot.power} points in sec. Quantity: {robot.count}"
+            )
+
+    def sell_robot(self, robot, button):
+        if robot.count > 0:
+            sell_price = int(robot.price * 0.5)
+            self.master.points += sell_price
+            robot.count -= 1
+
+        if robot.count <= 0:
+            robot.exists = False
+            robot.is_broken = False
 
             self.master.your_points_label.configure(
                 text=f"Your points:\n{self.master.points}"
