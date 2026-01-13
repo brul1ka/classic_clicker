@@ -176,9 +176,9 @@ class ClickerApp(ctk.CTk):
             if robot.check_for_breakdown() or robot.is_broken:
                 broken_robot_list.append(robot.name)
         if broken_robot_list:
-            names = ", ".join(broken_robot_list)
+            names = "s, ".join(broken_robot_list)
             self.robot_is_broken_label.configure(
-                text=f"{names}\nhave broken down!", text_color="red"
+                text=f"{names}s\nhave broken down!", text_color="red"
             )
         else:
             self.robot_is_broken_label.configure(text="")
